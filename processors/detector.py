@@ -1,12 +1,15 @@
+import os
 import cv2
 import torch
 import numpy as np
+import moviepy.editor as mp
+from tqdm import tqdm
 from processors.processor import Processor
 
 
 class Detector(Processor):
     def __init__(self) -> None:
-        self.model = torch.hub.load("ultralytics/yolov5", "yolov5s")
+        self.model = torch.hub.load("ultralytics/yolov5", "yolov5n6")
         self.fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         self.light_colors = {
             "red": (0, 0, 255),
@@ -18,8 +21,8 @@ class Detector(Processor):
         self.lower_red = np.array([0, 70, 50])
         self.upper_red = np.array([10, 255, 255])
 
-        self.lower_yellow = np.array([20, 100, 100])
-        self.upper_yellow = np.array([30, 255, 255])
+        self.lower_yellow = np.array([21, 39, 64])
+        self.upper_yellow = np.array([40, 255, 255])
 
         self.lower_green = np.array([40, 100, 100])
         self.upper_green = np.array([80, 255, 255])
@@ -60,17 +63,29 @@ class Detector(Processor):
         :param video_path:      Path to video file.
         :param output_path:     Path to output video file.
         """
+        video = mp.VideoFileClip(video_path)
+        duration = video.duration
+        fps = video.fps
+        video.close()
+
         cap = cv2.VideoCapture(video_path)
         frame_width = int(cap.get(3))
         frame_height = int(cap.get(4))
         writer = cv2.VideoWriter(
             output_path,
             self.fourcc,
-            cap.get(cv2.CAP_PROP_FPS),
+            fps,
             (frame_width, frame_height),
         )
 
-        for frame in self.get_frames(cap):
+        progress_bar = tqdm(
+            self.get_frames(cap),
+            desc="Process frames",
+            unit="frame",
+            total=int(duration * fps),
+            leave=False,
+        )
+        for frame in progress_bar:
             writer.write(self.detect_image_array(frame))
 
         cap.release()
