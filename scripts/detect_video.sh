@@ -1,0 +1,1 @@
+python tasks/detect.py --source source/videos --modality video --output output/videos

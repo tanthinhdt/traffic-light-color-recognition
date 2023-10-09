@@ -1,0 +1,1 @@
+python tasks/detect.py --source source/images --modality image --output output/images
