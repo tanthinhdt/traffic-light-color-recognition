@@ -24,17 +24,35 @@ class Detector(Processor):
         self.lower_green = np.array([40, 100, 100])
         self.upper_green = np.array([80, 255, 255])
 
-    def process(self, source: str, modality: str, output_path: str) -> None:
+    def process(self, modality: str, source: str = None, output_path: str = None) -> None:
         """
         Process function.
-        :param source:          Path to video or image file or directory.
         :param modality:        Modality of the input data.
+        :param source:          Path to video or image file or directory.
         :param output_path:     Path to output directory.
         """
-        if modality == "image":
-            self.detect_image(source, output_path)
+        if modality == "realtime":
+            self.detect_realtime()
         elif modality == "video":
             self.detect_video(source, output_path)
+        elif modality == "image":
+            self.detect_image(source, output_path)
+        else:
+            raise ValueError("Invalid modality")
+
+    def detect_realtime(self) -> None:
+        """
+        Detect traffic lights in realtime.
+        """
+        cap = cv2.VideoCapture(0)
+        while True:
+            ret, frame = cap.read()
+            if ret:
+                cv2.imshow("Traffic Light Detector", self.detect_image_array(frame))
+                if cv2.waitKey(1) & 0xFF == ord("q"):
+                    break
+        cap.release()
+        cv2.destroyAllWindows()
 
     def detect_video(self, video_path: str, output_path: str) -> None:
         """

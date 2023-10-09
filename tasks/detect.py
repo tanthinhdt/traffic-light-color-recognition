@@ -15,13 +15,13 @@ def parse_args():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--source", type=str, required=True, help="Path to video or image file or directory"
-    )
-    parser.add_argument(
         "--modality", type=str, required=True, help="Modality of the input data"
     )
     parser.add_argument(
-        "--output", type=str, required=True, help="Path to output directory"
+        "--source", type=str, default=None, help="Path to video or image file or directory"
+    )
+    parser.add_argument(
+        "--output", type=str, default=None, help="Path to output directory"
     )
     return parser.parse_args()
 
@@ -33,7 +33,7 @@ def main(args: argparse.Namespace):
     """
     detector = Detector()
 
-    source_paths = []
+    source_paths = [None]
     if args.modality == "image":
         if os.path.isdir(args.source):
             source_paths = glob.glob(os.path.join(args.source, "*.jpg"))
@@ -57,10 +57,13 @@ def main(args: argparse.Namespace):
             raise ValueError("No video file(s) found")
 
     for source_path in tqdm(source_paths, total=len(source_paths)):
-        output_path = os.path.join(args.output, os.path.basename(source_path))
+        if source_path:
+            output_path = os.path.join(args.output, os.path.basename(source_path))
+        else:
+            output_path = None
         detector.process(
-            source=source_path,
             modality=args.modality,
+            source=source_path,
             output_path=output_path,
         )
 
