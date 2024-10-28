@@ -1,0 +1,7 @@
+torch==2.1.0
+git+https://github.com/nficano/pytube
+validators==0.22.0
+opencv-python==4.8.1.78
+numpy==1.26.0
+tqdm==4.66.1
+pytube==15.0.0
